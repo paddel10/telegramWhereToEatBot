@@ -6,4 +6,4 @@ Telegram Bot automatically sets up a poll everyday so users in a group can vote 
 - User sets time the bot has to display the vote
 - User sets time the bot has to display the result
 - User starts or stops the poll
-- Several polls within the same group may be configured
+- Max 2 polls within the same group may be configured
