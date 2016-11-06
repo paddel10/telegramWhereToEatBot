@@ -16,9 +16,44 @@ class PollBot extends TelegramBot {
     if (!$this->mysqli) {
       $this->mysqli = new mysqli("localhost", TGRAM_USER, TGRAM_PWD, TGRAM_DB);
       if ($mysqli->connect_errno) {
-        throw new Exception("MySQL not connected");
+        throw new Exception("*** MySQL not connected: " . $mysqli->connect_error);
       }
     }
+  }
+
+  public function getEntry($key) {
+    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key = ?";
+    $statement = $this->mysqli->prepare($sql);
+    $statement->bind_param('s', $key);
+    if (!$statement->execute()) {
+      throw new Exception("*** Query failed: " . $statement->error);
+    }
+    // $count = $statement->affected_rows;
+    // $new_id = $statement->insert_id;
+    return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
+  }
+
+  public function writeEntry($key, $value) {
+    $sql = "REPLACE INTO " . TGRAM_TABLE . " VALUES (?, ?)";
+    $statement = $this->mysqli->prepare($sql);
+    $statement->bind_param('ss', $key, $value);
+    if (!$statement->execute()) {
+      throw new Exception("*** Query failed: " . $statement->error);
+    }
+  }
+
+  public function deleteEntry($key) {
+    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ?";
+    $statement = $this->mysqli->prepare($sql);
+    $statement->bind_param('s', $key);
+    if (!$statement->execute()) {
+      throw new Exception("*** Query failed: " . $statement->error);
+    }
+  }
+  
+  protected function entryExists($key) {
+    $result = $this->getEntry($key);
+    return $result->num_rows;
   }
 }
 
