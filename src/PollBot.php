@@ -43,11 +43,19 @@ class PollBot extends TelegramBot {
   }
 
   public function deleteEntry($key) {
-    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ?";
-    $statement = $this->mysqli->prepare($sql);
-    $statement->bind_param('s', $key);
-    if (!$statement->execute()) {
-      throw new Exception("*** Query failed: " . $statement->error);
+    $keys = array();
+    if (is_array($key)) {
+      $keys = $key;
+    } else {
+      array_push($keys, $key);
+    }
+    foreach ($keys as $key) {
+      $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ?";
+      $statement = $this->mysqli->prepare($sql);
+      $statement->bind_param('s', $key);
+      if (!$statement->execute()) {
+        throw new Exception("*** Query failed: " . $statement->error);
+      }
     }
   }
   
@@ -411,7 +419,7 @@ class PollBotChat extends TelegramBotChat {
   }
 
   protected function dbGetPoll() {
-    $poll_str = $this->redis->get('c'.$this->chatId.':poll');
+    $poll_str = $this->core->getEntry('c'.$this->chatId.':poll');
     if (!$poll_str) {
       return false;
     }
@@ -420,11 +428,11 @@ class PollBotChat extends TelegramBotChat {
 
   protected function dbSavePoll($poll) {
     $poll_str = json_encode($poll);
-    $this->redis->set('c'.$this->chatId.':poll', $poll_str);
+    $this->core->setEntry('c'.$this->chatId.':poll', $poll_str);
   }
 
   protected function dbGetPollById($poll_id) {
-    $poll_str = $this->redis->get('poll:'.$poll_id);
+    $poll_str = $this->core->getEntry('poll:'.$poll_id);
     if (!$poll_str) {
       return false;
     }
@@ -454,7 +462,7 @@ class PollBotChat extends TelegramBotChat {
     for ($i = 0; $i < self::$optionsLimit; $i++) {
       $keys[] = 'c'.$this->chatId.':o'.$i.':members';
     }
-    $this->redis->delete($keys);
+    $this->core->deleteEntry($keys);
   }
 
   protected function dbCheckOption($voter_id, $option_id) {
@@ -464,12 +472,12 @@ class PollBotChat extends TelegramBotChat {
 
   protected function dbSavePollCreating($author_id, $poll) {
     $chat_id = $this->chatId;
-    $this->redis->set("newpoll{$chat_id}:{$author_id}", json_encode($poll));
+    $this->core->setEntry("newpoll{$chat_id}:{$author_id}", json_encode($poll));
   }
 
   protected function dbGetPollCreating($author_id) {
     $chat_id = $this->chatId;
-    $poll = json_decode($this->redis->get("newpoll{$chat_id}:{$author_id}"), true);
+    $poll = json_decode($this->core->getEntry("newpoll{$chat_id}:{$author_id}"), true);
     return $poll;
   }
 
