@@ -1,13 +1,11 @@
 <?php
 
 require_once 'TelegramBot.php';
+require_once 'config.php';
 
 class PollBot extends TelegramBot {
 
-  public $redis = false;
-
-  protected static $REDIS_HOST = '127.0.0.1';
-  protected static $REDIS_PORT = 6379;
+  public $mysqli = false;
 
   public function init() {
     parent::init();
@@ -15,11 +13,10 @@ class PollBot extends TelegramBot {
   }
 
   public function dbInit() {
-    if (!$this->redis) {
-      $this->redis = new Redis();
-      $redis_connected = $this->redis->connect(self::$REDIS_HOST, self::$REDIS_PORT);
-      if (!$redis_connected) {
-        throw new Exception("Redis not connected");
+    if (!$this->mysqli) {
+      $this->mysqli = new mysqli("localhost", TGRAM_USER, TGRAM_PWD, TGRAM_DB);
+      if ($mysqli->connect_errno) {
+        throw new Exception("MySQL not connected");
       }
     }
   }
@@ -27,21 +24,19 @@ class PollBot extends TelegramBot {
 
 class PollBotChat extends TelegramBotChat {
 
-  protected $redis;
+  protected $mysqli;
 
   protected $curPoll = false;
   protected static $optionsLimit = 10;
 
   public function __construct($core, $chat_id) {
     parent::__construct($core, $chat_id);
-    $this->redis = $this->core->redis;
+    $this->mysqli = $this->core->mysqli;
   }
 
   public function init() {
     $this->curPoll = $this->dbGetPoll();
   }
-
-
 
   public function command_start($params, $message) {
     if (!$this->isGroup) {
@@ -214,8 +209,6 @@ class PollBotChat extends TelegramBotChat {
     }
   }
 
-
-
   protected function parsePollParams($params) {
     $params = explode("\n", $params);
     $params = array_map('trim', $params);
@@ -357,8 +350,6 @@ class PollBotChat extends TelegramBotChat {
     $this->apiSendMessage($text, $message_params);
   }
 
-
-
   protected function getPollText($poll, $plain = false) {
     $text = $poll['title']."\n";
     foreach ($poll['options'] as $i => $option) {
@@ -383,8 +374,6 @@ class PollBotChat extends TelegramBotChat {
     $username = strtolower($this->core->botUsername);
     return "telegram.me/{$username}?startgroup={$poll_id}";
   }
-
-
 
   protected function dbGetPoll() {
     $poll_str = $this->redis->get('c'.$this->chatId.':poll');
@@ -471,8 +460,6 @@ class PollBotChat extends TelegramBotChat {
     $added = array_shift($result);
     return $added;
   }
-
-
 
   protected function sendGreeting() {
     $this->apiSendMessage("To create a new poll, send me a message exactly in this format:\n\n/newpoll\nYour question\nAnswer option 1\nAnswer option 2\n...\nAnswer option x");
