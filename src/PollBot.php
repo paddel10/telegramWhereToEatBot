@@ -40,6 +40,7 @@ class PollBot extends TelegramBot {
     if (!$statement->execute()) {
       throw new Exception("*** Query failed: " . $statement->error);
     }
+    return $statement->affected_rows;
   }
 
   public function deleteEntry($key) {
@@ -57,11 +58,34 @@ class PollBot extends TelegramBot {
         throw new Exception("*** Query failed: " . $statement->error);
       }
     }
+    return $statement->affected_rows;
   }
   
-  protected function entryExists($key) {
+  public function deleteKeyValueEntry($key, $value) {
+    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ? AND value = ?";
+    $statement = $this->mysqli->prepare($sql);
+    $statement->bind_param('ss', $key);
+    if (!$statement->execute()) {
+      throw new Exception("*** Query failed: " . $statement->error);
+    }
+    return $statement->affected_rows;
+  }
+  
+  public function entryExists($key) {
     $result = $this->getEntry($key);
     return $result->num_rows;
+  }
+
+  public function keyValueExists($key, $value) {
+    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key = ? AND value = ?";
+    $statement = $this->mysqli->prepare($sql);
+    $statement->bind_param('ss', $key, $value);
+    if (!$statement->execute()) {
+      throw new Exception("*** Query failed: " . $statement->error);
+    }
+    // $count = $statement->affected_rows;
+    // $new_id = $statement->insert_id;
+    return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
   }
 }
 
@@ -444,8 +468,9 @@ class PollBotChat extends TelegramBotChat {
     $tries = 0;
     do {
       $poll_id = md5($poll_str.'#'.$tries);
-      $result = $this->redis->setnx('poll:'.$poll_id, $poll_str);
-      if ($result) {
+      if(!$this->core->keyValueExists('poll:'.$poll_id, $poll_str)) {
+        // entry doesn't exist - insert and break;
+        $this->core->writeEntry('poll:'.$poll_id, $poll_str);
         break;
       }
     } while (++$tries < 100);
@@ -467,7 +492,7 @@ class PollBotChat extends TelegramBotChat {
 
   protected function dbCheckOption($voter_id, $option_id) {
     $chat_id = $this->chatId;
-    return $this->redis->sIsMember('c'.$chat_id.':o'.$option_id.':members', $voter_id);
+    return $this->core->keyValueExists('c'.$chat_id.':o'.$option_id.':members', $voter_id);
   }
 
   protected function dbSavePollCreating($author_id, $poll) {
@@ -483,25 +508,23 @@ class PollBotChat extends TelegramBotChat {
 
   protected function dbDropPollCreating($author_id) {
     $chat_id = $this->chatId;
-    return $this->redis->delete("newpoll{$chat_id}:{$author_id}");
+    return $this->core->deleteEntry("newpoll{$chat_id}:{$author_id}");
   }
 
   protected function dbSelectOption($voter_id, $option_id) {
     $chat_id = $this->chatId;
-    $redis = $this->redis->multi();
-    $redis->sAdd('c'.$chat_id.':members', $voter_id);
+    $this->core->writeEntry('c'.$chat_id.':members', $voter_id);
 
     $options_count = count($this->curPoll['options']);
+    $bRet = false;
     for ($i = 0; $i < $options_count; $i++) {
       if ($i == $option_id) {
-        $redis->sAdd('c'.$chat_id.':o'.$i.':members', $voter_id);
+        $bRet = $this->core->writeEntry('c'.$chat_id.':o'.$i.':members', $voter_id);
       } else {
-        $redis->sRem('c'.$chat_id.':o'.$i.':members', $voter_id);
+        $this->core->deleteKeyValueEntry('c'.$chat_id.':o'.$i.':members', $voter_id);
       }
     }
-    $result = $redis->exec();
-    $added = array_shift($result);
-    return $added;
+    return $bRet;
   }
 
   protected function sendGreeting() {
@@ -567,7 +590,7 @@ class PollBotChat extends TelegramBotChat {
     $total_value = 0;
     $max_value = 0;
     foreach ($this->curPoll['options'] as $i => $option) {
-      $value = intval($this->redis->sCard('c'.$this->chatId.':o'.$i.':members'));
+      $value = $this->core->entryExists('c'.$this->chatId.':o'.$i.':members');
       $total_value += $value;
       $max_value = max($max_value, $value);
       $results[] = array(
