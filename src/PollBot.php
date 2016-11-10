@@ -488,10 +488,10 @@ class PollBotChat extends TelegramBotChat {
   protected function dbGetPoll() {
     $key = 'c'.$this->chatId.':poll';
     $entry = $this->core->getEntry($key);
-    $poll_str = $entry[$key];
-    if (!$poll_str) {
+    if (!count($entry)) {
       return false;
     }
+    $poll_str = $entry[$key];
     return json_decode($poll_str, true);
   }
 
@@ -503,10 +503,10 @@ class PollBotChat extends TelegramBotChat {
   protected function dbGetPollById($poll_id) {
     $key = 'poll:'.$poll_id;
     $entry = $this->core->getEntry($key);
-    $poll_str = $entry[$key];
-    if (!$poll_str) {
+    if (!count($entry)) {
       return false;
     }
+    $poll_str = $entry[$key];
     return json_decode($poll_str, true);
   }
 
