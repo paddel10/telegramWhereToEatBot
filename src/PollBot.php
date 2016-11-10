@@ -61,6 +61,16 @@ class PollBot extends TelegramBot {
     return $statement->affected_rows;
   }
   
+  public function deleteKeyValueEntry($key, $value) {
+    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ? AND value = ?";
+    $statement = $this->mysqli->prepare($sql);
+    $statement->bind_param('ss', $key);
+    if (!$statement->execute()) {
+      throw new Exception("*** Query failed: " . $statement->error);
+    }
+    return $statement->affected_rows;
+  }
+  
   public function entryExists($key) {
     $result = $this->getEntry($key);
     return $result->num_rows;
@@ -506,16 +516,15 @@ class PollBotChat extends TelegramBotChat {
     $this->core->writeEntry('c'.$chat_id.':members', $voter_id);
 
     $options_count = count($this->curPoll['options']);
+    $bRet = false;
     for ($i = 0; $i < $options_count; $i++) {
       if ($i == $option_id) {
-        $this->core->sAdd('c'.$chat_id.':o'.$i.':members', $voter_id);
+        $bRet = $this->core->writeEntry('c'.$chat_id.':o'.$i.':members', $voter_id);
       } else {
-        $redis->sRem('c'.$chat_id.':o'.$i.':members', $voter_id);
+        $this->core->deleteKeyValueEntry('c'.$chat_id.':o'.$i.':members', $voter_id);
       }
     }
-    $result = $redis->exec();
-    $added = array_shift($result);
-    return $added;
+    return $bRet;
   }
 
   protected function sendGreeting() {
@@ -581,7 +590,7 @@ class PollBotChat extends TelegramBotChat {
     $total_value = 0;
     $max_value = 0;
     foreach ($this->curPoll['options'] as $i => $option) {
-      $value = intval($this->redis->sCard('c'.$this->chatId.':o'.$i.':members'));
+      $value = $this->core->entryExists('c'.$this->chatId.':o'.$i.':members');
       $total_value += $value;
       $max_value = max($max_value, $value);
       $results[] = array(
