@@ -544,7 +544,7 @@ class PollBotChat extends TelegramBotChat {
 
   protected function dbSavePollCreating($author_id, $poll) {
     $chat_id = $this->chatId;
-    $this->core->setEntry("newpoll{$chat_id}:{$author_id}", json_encode($poll));
+    $this->core->writeEntry("newpoll{$chat_id}:{$author_id}", json_encode($poll));
   }
 
   protected function dbGetPollCreating($author_id) {
