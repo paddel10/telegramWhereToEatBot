@@ -32,7 +32,7 @@ class PollBot extends TelegramBot {
       // $new_id = $statement->insert_id;
       return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
     } else {
-      throw new Exception("*** Prepare failed in getEntry()");
+      throw new Exception("*** Prepare failed in getEntry() " . $sql);
     }
   }
 
