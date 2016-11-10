@@ -15,7 +15,7 @@ class PollBot extends TelegramBot {
   public function dbInit() {
     if (!$this->mysqli) {
       $this->mysqli = new mysqli("localhost", TGRAM_USER, TGRAM_PWD, TGRAM_DB);
-      if ($mysqli->connect_errno) {
+      if ($this->mysqli->connect_errno) {
         throw new Exception("*** MySQL not connected: " . $mysqli->connect_error);
       }
     }
