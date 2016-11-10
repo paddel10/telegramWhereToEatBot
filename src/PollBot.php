@@ -22,7 +22,7 @@ class PollBot extends TelegramBot {
   }
 
   public function getEntry($key) {
-    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key=?";
+    $sql = "SELECT k,v FROM " . TGRAM_TABLE . " WHERE key=?";
     if ($statement = $this->mysqli->prepare($sql)) {
       $statement->bind_param('s', $key);
       if (!$statement->execute()) {
@@ -30,7 +30,12 @@ class PollBot extends TelegramBot {
       }
       // $count = $statement->affected_rows;
       // $new_id = $statement->insert_id;
-      return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
+      $result = array();
+      $statement->bind_result($k, $v); // while($row = $result->fetch_assoc()) {}
+      while ($statement->fetch()) {
+        $result[$k] = $v;
+      }
+      return $result;
     } else {
       throw new Exception("*** Prepare failed in getEntry() " . $this->mysqli->error);
     }
@@ -84,8 +89,7 @@ class PollBot extends TelegramBot {
   }
   
   public function entryExists($key) {
-    $result = $this->getEntry($key);
-    return $result->num_rows;
+    return count($this->getEntry($key));
   }
 
   public function keyValueExists($key, $value) {
@@ -458,7 +462,9 @@ class PollBotChat extends TelegramBotChat {
   }
 
   protected function dbGetPoll() {
-    $poll_str = $this->core->getEntry('c'.$this->chatId.':poll');
+    $key = 'c'.$this->chatId.':poll';
+    $entry = $this->core->getEntry($key);
+    $poll_str = $entry[$key];
     if (!$poll_str) {
       return false;
     }
@@ -471,7 +477,9 @@ class PollBotChat extends TelegramBotChat {
   }
 
   protected function dbGetPollById($poll_id) {
-    $poll_str = $this->core->getEntry('poll:'.$poll_id);
+    $key = 'poll:'.$poll_id;
+    $entry = $this->core->getEntry($key);
+    $poll_str = $entry[$key];
     if (!$poll_str) {
       return false;
     }
@@ -517,7 +525,10 @@ class PollBotChat extends TelegramBotChat {
 
   protected function dbGetPollCreating($author_id) {
     $chat_id = $this->chatId;
-    $poll = json_decode($this->core->getEntry("newpoll{$chat_id}:{$author_id}"), true);
+    $key = "newpoll{$chat_id}:{$author_id}";
+    $entry = $this->core->getEntry($key);
+    $value = $entry[$key];
+    $poll = json_decode($key, true);
     return $poll;
   }
 
