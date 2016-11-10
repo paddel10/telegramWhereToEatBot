@@ -35,6 +35,10 @@ class PollBot extends TelegramBot {
       while ($statement->fetch()) {
         $result[$k] = $v;
       }
+      // cleanup
+      $statement->free_result();
+      $statement->close();
+      
       return $result;
     } else {
       throw new Exception("*** Prepare failed in getEntry() " . $this->mysqli->error);
@@ -48,7 +52,11 @@ class PollBot extends TelegramBot {
       if (!$statement->execute()) {
         throw new Exception("*** Query failed: " . $statement->error);
       }
-      return $statement->affected_rows;
+      $affectedRows = $statement->affected_rows;
+      // cleanup
+      $statement->free_result();
+      $statement->close();
+      return $affectedRows;
     } else {
       throw new Exception("*** Prepare failed in writeEntry() " . $this->mysqli->error);
     }
@@ -72,7 +80,12 @@ class PollBot extends TelegramBot {
         throw new Exception("*** Prepare failed in deleteEntry() " . $this->mysqli->error);
       }
     }
-    return $statement->affected_rows;
+    $affectedRows = $statement->affected_rows;
+    // cleanup
+    $statement->free_result();
+    $statement->close();
+    
+    return $affectedRows;
   }
   
   public function deleteKeyValueEntry($key, $value) {
@@ -85,7 +98,13 @@ class PollBot extends TelegramBot {
         throw new Exception("*** Prepare failed in deleteKeyValueEntry() " . $this->mysqli->error);
       }
     }
-    return $statement->affected_rows;
+    
+    $affectedRows = $statement->affected_rows;
+    // cleanup
+    $statement->free_result();
+    $statement->close();
+    
+    return $affectedRows;
   }
   
   public function entryExists($key) {
@@ -101,7 +120,12 @@ class PollBot extends TelegramBot {
       }
       // $count = $statement->affected_rows;
       // $new_id = $statement->insert_id;
-      return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
+      $numRows = $stmt->num_rows;
+      // cleanup
+      $statement->free_result();
+      $statement->close(); 
+      
+      return $numRows;
     } else {
       throw new Exception("*** Prepare failed in keyValueExists() " . $this->mysqli->error);
     }
