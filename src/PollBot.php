@@ -22,7 +22,7 @@ class PollBot extends TelegramBot {
   }
 
   public function getEntry($key) {
-    $sql = "SELECT k,v FROM " . TGRAM_TABLE . " WHERE key=?";
+    $sql = "SELECT k,v FROM " . TGRAM_TABLE . " WHERE k = ?";
     if ($statement = $this->mysqli->prepare($sql)) {
       $statement->bind_param('s', $key);
       if (!$statement->execute()) {
@@ -35,6 +35,10 @@ class PollBot extends TelegramBot {
       while ($statement->fetch()) {
         $result[$k] = $v;
       }
+      // cleanup
+      $statement->free_result();
+      $statement->close();
+      
       return $result;
     } else {
       throw new Exception("*** Prepare failed in getEntry() " . $this->mysqli->error);
@@ -48,7 +52,11 @@ class PollBot extends TelegramBot {
       if (!$statement->execute()) {
         throw new Exception("*** Query failed: " . $statement->error);
       }
-      return $statement->affected_rows;
+      $affectedRows = $statement->affected_rows;
+      // cleanup
+      $statement->free_result();
+      $statement->close();
+      return $affectedRows;
     } else {
       throw new Exception("*** Prepare failed in writeEntry() " . $this->mysqli->error);
     }
@@ -62,7 +70,7 @@ class PollBot extends TelegramBot {
       array_push($keys, $key);
     }
     foreach ($keys as $key) {
-      $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key=?";
+      $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE k = ?";
       if ($statement = $this->mysqli->prepare($sql)) {
         $statement->bind_param('s', $key);
         if (!$statement->execute()) {
@@ -72,11 +80,16 @@ class PollBot extends TelegramBot {
         throw new Exception("*** Prepare failed in deleteEntry() " . $this->mysqli->error);
       }
     }
-    return $statement->affected_rows;
+    $affectedRows = $statement->affected_rows;
+    // cleanup
+    $statement->free_result();
+    $statement->close();
+    
+    return $affectedRows;
   }
   
   public function deleteKeyValueEntry($key, $value) {
-    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key=? AND value=?";
+    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE k = ? AND v = ?";
     if ($statement = $this->mysqli->prepare($sql)) {
       $statement->bind_param('ss', $key);
       if (!$statement->execute()) {
@@ -85,7 +98,13 @@ class PollBot extends TelegramBot {
         throw new Exception("*** Prepare failed in deleteKeyValueEntry() " . $this->mysqli->error);
       }
     }
-    return $statement->affected_rows;
+    
+    $affectedRows = $statement->affected_rows;
+    // cleanup
+    $statement->free_result();
+    $statement->close();
+    
+    return $affectedRows;
   }
   
   public function entryExists($key) {
@@ -93,7 +112,7 @@ class PollBot extends TelegramBot {
   }
 
   public function keyValueExists($key, $value) {
-    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key=? AND value=?";
+    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE k = ? AND v = ?";
     if ($statement = $this->mysqli->prepare($sql)) {
       $statement->bind_param('ss', $key, $value);
       if (!$statement->execute()) {
@@ -101,7 +120,12 @@ class PollBot extends TelegramBot {
       }
       // $count = $statement->affected_rows;
       // $new_id = $statement->insert_id;
-      return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
+      $numRows = $stmt->num_rows;
+      // cleanup
+      $statement->free_result();
+      $statement->close(); 
+      
+      return $numRows;
     } else {
       throw new Exception("*** Prepare failed in keyValueExists() " . $this->mysqli->error);
     }
