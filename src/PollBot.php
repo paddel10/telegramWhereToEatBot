@@ -32,7 +32,7 @@ class PollBot extends TelegramBot {
       // $new_id = $statement->insert_id;
       return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
     } else {
-      throw new Exception("*** Prepare failed in getEntry() " . $sql);
+      throw new Exception("*** Prepare failed in getEntry() " . $this->mysqli->error);
     }
   }
 
@@ -45,7 +45,7 @@ class PollBot extends TelegramBot {
       }
       return $statement->affected_rows;
     } else {
-      throw new Exception("*** Prepare failed in writeEntry()");
+      throw new Exception("*** Prepare failed in writeEntry() " . $this->mysqli->error);
     }
   }
 
@@ -64,7 +64,7 @@ class PollBot extends TelegramBot {
           throw new Exception("*** Query failed: " . $statement->error);
         }
       } else {
-        throw new Exception("*** Prepare failed in deleteEntry()");
+        throw new Exception("*** Prepare failed in deleteEntry() " . $this->mysqli->error);
       }
     }
     return $statement->affected_rows;
@@ -77,7 +77,7 @@ class PollBot extends TelegramBot {
       if (!$statement->execute()) {
         throw new Exception("*** Query failed: " . $statement->error);
       } else {
-        throw new Exception("*** Prepare failed in deleteKeyValueEntry()");
+        throw new Exception("*** Prepare failed in deleteKeyValueEntry() " . $this->mysqli->error);
       }
     }
     return $statement->affected_rows;
@@ -99,7 +99,7 @@ class PollBot extends TelegramBot {
       // $new_id = $statement->insert_id;
       return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
     } else {
-      throw new Exception("*** Prepare failed in keyValueExists()");
+      throw new Exception("*** Prepare failed in keyValueExists() " . $this->mysqli->error);
     }
   }
 }
