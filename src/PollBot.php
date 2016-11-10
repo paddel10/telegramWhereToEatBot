@@ -22,7 +22,7 @@ class PollBot extends TelegramBot {
   }
 
   public function getEntry($key) {
-    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key = ?";
+    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key=?";
     if ($statement = $this->mysqli->prepare($sql)) {
       $statement->bind_param('s', $key);
       if (!$statement->execute()) {
@@ -57,7 +57,7 @@ class PollBot extends TelegramBot {
       array_push($keys, $key);
     }
     foreach ($keys as $key) {
-      $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ?";
+      $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key=?";
       if ($statement = $this->mysqli->prepare($sql)) {
         $statement->bind_param('s', $key);
         if (!$statement->execute()) {
@@ -71,7 +71,7 @@ class PollBot extends TelegramBot {
   }
   
   public function deleteKeyValueEntry($key, $value) {
-    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ? AND value = ?";
+    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key=? AND value=?";
     if ($statement = $this->mysqli->prepare($sql)) {
       $statement->bind_param('ss', $key);
       if (!$statement->execute()) {
@@ -89,7 +89,7 @@ class PollBot extends TelegramBot {
   }
 
   public function keyValueExists($key, $value) {
-    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key = ? AND value = ?";
+    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key=? AND value=?";
     if ($statement = $this->mysqli->prepare($sql)) {
       $statement->bind_param('ss', $key, $value);
       if (!$statement->execute()) {
