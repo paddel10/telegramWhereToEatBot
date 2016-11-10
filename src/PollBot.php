@@ -23,24 +23,30 @@ class PollBot extends TelegramBot {
 
   public function getEntry($key) {
     $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key = ?";
-    $statement = $this->mysqli->prepare($sql);
-    $statement->bind_param('s', $key);
-    if (!$statement->execute()) {
-      throw new Exception("*** Query failed: " . $statement->error);
+    if ($statement = $this->mysqli->prepare($sql)) {
+      $statement->bind_param('s', $key);
+      if (!$statement->execute()) {
+        throw new Exception("*** Query failed: " . $statement->error);
+      }
+      // $count = $statement->affected_rows;
+      // $new_id = $statement->insert_id;
+      return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
+    } else {
+      throw new Exception("*** Prepare failed in getEntry()");
     }
-    // $count = $statement->affected_rows;
-    // $new_id = $statement->insert_id;
-    return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
   }
 
   public function writeEntry($key, $value) {
     $sql = "REPLACE INTO " . TGRAM_TABLE . " VALUES (?, ?)";
-    $statement = $this->mysqli->prepare($sql);
-    $statement->bind_param('ss', $key, $value);
-    if (!$statement->execute()) {
-      throw new Exception("*** Query failed: " . $statement->error);
+    if ($statement = $this->mysqli->prepare($sql)) {
+      $statement->bind_param('ss', $key, $value);
+      if (!$statement->execute()) {
+        throw new Exception("*** Query failed: " . $statement->error);
+      }
+      return $statement->affected_rows;
+    } else {
+      throw new Exception("*** Prepare failed in writeEntry()");
     }
-    return $statement->affected_rows;
   }
 
   public function deleteEntry($key) {
@@ -52,10 +58,13 @@ class PollBot extends TelegramBot {
     }
     foreach ($keys as $key) {
       $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ?";
-      $statement = $this->mysqli->prepare($sql);
-      $statement->bind_param('s', $key);
-      if (!$statement->execute()) {
-        throw new Exception("*** Query failed: " . $statement->error);
+      if ($statement = $this->mysqli->prepare($sql)) {
+        $statement->bind_param('s', $key);
+        if (!$statement->execute()) {
+          throw new Exception("*** Query failed: " . $statement->error);
+        }
+      } else {
+        throw new Exception("*** Prepare failed in deleteEntry()");
       }
     }
     return $statement->affected_rows;
@@ -63,10 +72,13 @@ class PollBot extends TelegramBot {
   
   public function deleteKeyValueEntry($key, $value) {
     $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE key = ? AND value = ?";
-    $statement = $this->mysqli->prepare($sql);
-    $statement->bind_param('ss', $key);
-    if (!$statement->execute()) {
-      throw new Exception("*** Query failed: " . $statement->error);
+    if ($statement = $this->mysqli->prepare($sql)) {
+      $statement->bind_param('ss', $key);
+      if (!$statement->execute()) {
+        throw new Exception("*** Query failed: " . $statement->error);
+      } else {
+        throw new Exception("*** Prepare failed in deleteKeyValueEntry()");
+      }
     }
     return $statement->affected_rows;
   }
@@ -78,14 +90,17 @@ class PollBot extends TelegramBot {
 
   public function keyValueExists($key, $value) {
     $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE key = ? AND value = ?";
-    $statement = $this->mysqli->prepare($sql);
-    $statement->bind_param('ss', $key, $value);
-    if (!$statement->execute()) {
-      throw new Exception("*** Query failed: " . $statement->error);
+    if ($statement = $this->mysqli->prepare($sql)) {
+      $statement->bind_param('ss', $key, $value);
+      if (!$statement->execute()) {
+        throw new Exception("*** Query failed: " . $statement->error);
+      }
+      // $count = $statement->affected_rows;
+      // $new_id = $statement->insert_id;
+      return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
+    } else {
+      throw new Exception("*** Prepare failed in keyValueExists()");
     }
-    // $count = $statement->affected_rows;
-    // $new_id = $statement->insert_id;
-    return $statement->get_result(); // while($row = $result->fetch_assoc()) {}
   }
 }
 
