@@ -1,11 +1,13 @@
 <?php
 
 require_once 'TelegramBot.php';
-require_once 'config.php';
 
 class PollBot extends TelegramBot {
 
-  public $mysqli = false;
+  public $redis = false;
+
+  protected static $REDIS_HOST = '127.0.0.1';
+  protected static $REDIS_PORT = 6379;
 
   public function init() {
     parent::init();
@@ -13,140 +15,33 @@ class PollBot extends TelegramBot {
   }
 
   public function dbInit() {
-    if (!$this->mysqli) {
-      $this->mysqli = new mysqli("localhost", TGRAM_USER, TGRAM_PWD, TGRAM_DB);
-      if ($this->mysqli->connect_errno) {
-        throw new Exception("*** MySQL not connected: " . $mysqli->connect_error);
+    if (!$this->redis) {
+      $this->redis = new Redis();
+      $redis_connected = $this->redis->connect(self::$REDIS_HOST, self::$REDIS_PORT);
+      if (!$redis_connected) {
+        throw new Exception("Redis not connected");
       }
-    }
-  }
-
-  public function getEntry($key) {
-    $sql = "SELECT k,v FROM " . TGRAM_TABLE . " WHERE k = ?";
-    if ($statement = $this->mysqli->prepare($sql)) {
-      $statement->bind_param('s', $key);
-      if (!$statement->execute()) {
-        throw new Exception("*** Query failed: " . $statement->error);
-      }
-      // $count = $statement->affected_rows;
-      // $new_id = $statement->insert_id;
-      $result = array();
-      $statement->bind_result($k, $v); // while($row = $result->fetch_assoc()) {}
-      while ($statement->fetch()) {
-        $result[$k] = $v;
-      }
-      // cleanup
-      $statement->free_result();
-      $statement->close();
-      
-      return $result;
-    } else {
-      throw new Exception("*** Prepare failed in getEntry() " . $this->mysqli->error);
-    }
-  }
-
-  public function writeEntry($key, $value) {
-    $sql = "REPLACE INTO " . TGRAM_TABLE . " VALUES (?, ?)";
-    if ($statement = $this->mysqli->prepare($sql)) {
-      $statement->bind_param('ss', $key, $value);
-      if (!$statement->execute()) {
-        throw new Exception("*** Query failed: " . $statement->error);
-      }
-      $affectedRows = $statement->affected_rows;
-      // cleanup
-      $statement->free_result();
-      $statement->close();
-      return $affectedRows;
-    } else {
-      throw new Exception("*** Prepare failed in writeEntry() " . $this->mysqli->error);
-    }
-  }
-
-  public function deleteEntry($key) {
-    $keys = array();
-    if (is_array($key)) {
-      $keys = $key;
-    } else {
-      array_push($keys, $key);
-    }
-    foreach ($keys as $key) {
-      $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE k = ?";
-      if ($statement = $this->mysqli->prepare($sql)) {
-        $statement->bind_param('s', $key);
-        if (!$statement->execute()) {
-          throw new Exception("*** Query failed: " . $statement->error);
-        }
-      } else {
-        throw new Exception("*** Prepare failed in deleteEntry() " . $this->mysqli->error);
-      }
-    }
-    $affectedRows = $statement->affected_rows;
-    // cleanup
-    $statement->free_result();
-    $statement->close();
-    
-    return $affectedRows;
-  }
-  
-  public function deleteKeyValueEntry($key, $value) {
-    $sql = "DELETE FROM " . TGRAM_TABLE . " WHERE k = ? AND v = ?";
-    if ($statement = $this->mysqli->prepare($sql)) {
-      $statement->bind_param('ss', $key);
-      if (!$statement->execute()) {
-        throw new Exception("*** Query failed: " . $statement->error);
-      } else {
-        throw new Exception("*** Prepare failed in deleteKeyValueEntry() " . $this->mysqli->error);
-      }
-    }
-    
-    $affectedRows = $statement->affected_rows;
-    // cleanup
-    $statement->free_result();
-    $statement->close();
-    
-    return $affectedRows;
-  }
-  
-  public function entryExists($key) {
-    return count($this->getEntry($key));
-  }
-
-  public function keyValueExists($key, $value) {
-    $sql = "SELECT * FROM " . TGRAM_TABLE . " WHERE k = ? AND v = ?";
-    if ($statement = $this->mysqli->prepare($sql)) {
-      $statement->bind_param('ss', $key, $value);
-      if (!$statement->execute()) {
-        throw new Exception("*** Query failed: " . $statement->error);
-      }
-      // $count = $statement->affected_rows;
-      // $new_id = $statement->insert_id;
-      $numRows = $stmt->num_rows;
-      // cleanup
-      $statement->free_result();
-      $statement->close(); 
-      
-      return $numRows;
-    } else {
-      throw new Exception("*** Prepare failed in keyValueExists() " . $this->mysqli->error);
     }
   }
 }
 
 class PollBotChat extends TelegramBotChat {
 
-  protected $mysqli;
+  protected $redis;
 
   protected $curPoll = false;
   protected static $optionsLimit = 10;
 
   public function __construct($core, $chat_id) {
     parent::__construct($core, $chat_id);
-    $this->mysqli = $this->core->mysqli;
+    $this->redis = $this->core->redis;
   }
 
   public function init() {
     $this->curPoll = $this->dbGetPoll();
   }
+
+
 
   public function command_start($params, $message) {
     if (!$this->isGroup) {
@@ -319,6 +214,8 @@ class PollBotChat extends TelegramBotChat {
     }
   }
 
+
+
   protected function parsePollParams($params) {
     $params = explode("\n", $params);
     $params = array_map('trim', $params);
@@ -460,6 +357,8 @@ class PollBotChat extends TelegramBotChat {
     $this->apiSendMessage($text, $message_params);
   }
 
+
+
   protected function getPollText($poll, $plain = false) {
     $text = $poll['title']."\n";
     foreach ($poll['options'] as $i => $option) {
@@ -485,28 +384,26 @@ class PollBotChat extends TelegramBotChat {
     return "telegram.me/{$username}?startgroup={$poll_id}";
   }
 
+
+
   protected function dbGetPoll() {
-    $key = 'c'.$this->chatId.':poll';
-    $entry = $this->core->getEntry($key);
-    if (!count($entry)) {
+    $poll_str = $this->redis->get('c'.$this->chatId.':poll');
+    if (!$poll_str) {
       return false;
     }
-    $poll_str = $entry[$key];
     return json_decode($poll_str, true);
   }
 
   protected function dbSavePoll($poll) {
     $poll_str = json_encode($poll);
-    $this->core->setEntry('c'.$this->chatId.':poll', $poll_str);
+    $this->redis->set('c'.$this->chatId.':poll', $poll_str);
   }
 
   protected function dbGetPollById($poll_id) {
-    $key = 'poll:'.$poll_id;
-    $entry = $this->core->getEntry($key);
-    if (!count($entry)) {
+    $poll_str = $this->redis->get('poll:'.$poll_id);
+    if (!$poll_str) {
       return false;
     }
-    $poll_str = $entry[$key];
     return json_decode($poll_str, true);
   }
 
@@ -515,9 +412,8 @@ class PollBotChat extends TelegramBotChat {
     $tries = 0;
     do {
       $poll_id = md5($poll_str.'#'.$tries);
-      if(!$this->core->keyValueExists('poll:'.$poll_id, $poll_str)) {
-        // entry doesn't exist - insert and break;
-        $this->core->writeEntry('poll:'.$poll_id, $poll_str);
+      $result = $this->redis->setnx('poll:'.$poll_id, $poll_str);
+      if ($result) {
         break;
       }
     } while (++$tries < 100);
@@ -534,48 +430,49 @@ class PollBotChat extends TelegramBotChat {
     for ($i = 0; $i < self::$optionsLimit; $i++) {
       $keys[] = 'c'.$this->chatId.':o'.$i.':members';
     }
-    $this->core->deleteEntry($keys);
+    $this->redis->delete($keys);
   }
 
   protected function dbCheckOption($voter_id, $option_id) {
     $chat_id = $this->chatId;
-    return $this->core->keyValueExists('c'.$chat_id.':o'.$option_id.':members', $voter_id);
+    return $this->redis->sIsMember('c'.$chat_id.':o'.$option_id.':members', $voter_id);
   }
 
   protected function dbSavePollCreating($author_id, $poll) {
     $chat_id = $this->chatId;
-    $this->core->writeEntry("newpoll{$chat_id}:{$author_id}", json_encode($poll));
+    $this->redis->set("newpoll{$chat_id}:{$author_id}", json_encode($poll));
   }
 
   protected function dbGetPollCreating($author_id) {
     $chat_id = $this->chatId;
-    $key = "newpoll{$chat_id}:{$author_id}";
-    $entry = $this->core->getEntry($key);
-    $value = $entry[$key];
-    $poll = json_decode($key, true);
+    $poll = json_decode($this->redis->get("newpoll{$chat_id}:{$author_id}"), true);
     return $poll;
   }
 
   protected function dbDropPollCreating($author_id) {
     $chat_id = $this->chatId;
-    return $this->core->deleteEntry("newpoll{$chat_id}:{$author_id}");
+    return $this->redis->delete("newpoll{$chat_id}:{$author_id}");
   }
 
   protected function dbSelectOption($voter_id, $option_id) {
     $chat_id = $this->chatId;
-    $this->core->writeEntry('c'.$chat_id.':members', $voter_id);
+    $redis = $this->redis->multi();
+    $redis->sAdd('c'.$chat_id.':members', $voter_id);
 
     $options_count = count($this->curPoll['options']);
-    $bRet = false;
     for ($i = 0; $i < $options_count; $i++) {
       if ($i == $option_id) {
-        $bRet = $this->core->writeEntry('c'.$chat_id.':o'.$i.':members', $voter_id);
+        $redis->sAdd('c'.$chat_id.':o'.$i.':members', $voter_id);
       } else {
-        $this->core->deleteKeyValueEntry('c'.$chat_id.':o'.$i.':members', $voter_id);
+        $redis->sRem('c'.$chat_id.':o'.$i.':members', $voter_id);
       }
     }
-    return $bRet;
+    $result = $redis->exec();
+    $added = array_shift($result);
+    return $added;
   }
+
+
 
   protected function sendGreeting() {
     $this->apiSendMessage("To create a new poll, send me a message exactly in this format:\n\n/newpoll\nYour question\nAnswer option 1\nAnswer option 2\n...\nAnswer option x");
@@ -640,7 +537,7 @@ class PollBotChat extends TelegramBotChat {
     $total_value = 0;
     $max_value = 0;
     foreach ($this->curPoll['options'] as $i => $option) {
-      $value = $this->core->entryExists('c'.$this->chatId.':o'.$i.':members');
+      $value = intval($this->redis->sCard('c'.$this->chatId.':o'.$i.':members'));
       $total_value += $value;
       $max_value = max($max_value, $value);
       $results[] = array(
