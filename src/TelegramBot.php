@@ -171,6 +171,7 @@ class TelegramBot extends TelegramBotCore {
   }
 
   public function onUpdateReceived($update) {
+    error_log("onUpdateReceived() " . var_export($update, true));
     if ($update['message']) {
       $message = $update['message'];
       $chat_id = intval($message['chat']['id']);
