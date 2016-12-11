@@ -15,7 +15,7 @@ if (php_sapi_name() == 'cli') {
     $bot->removeWebhook();
     exit;
   } else if ($argv[1] == '/newpoll') {
-    $messages = array($argv[1], "Wo essen?", "Linde", "Weinberg", "Büro", "andere");
+    $messages = array($argv[1], "Wo essen?", "Linde", "Weinberg", "Büro", "andere", "/done");
     foreach ($messages as $message) {
       array_push($updates, generateMessage(CHAT_ID, $message, FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
     }
