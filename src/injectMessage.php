@@ -2,11 +2,11 @@
 
 /**
 *
-* @param $command /newpoll
+* @param $text /newpoll
 **/
-function generateMessage($chat_id, $command, $from_id, $from_first_name, $chat_title) {
+function generateMessage($chat_id, $text, $from_id, $from_first_name, $chat_title) {
   $isBotCommand = false;
-  if ($command[0] == '/') {
+  if ($text[0] == '/') {
     $isBotCommand = true;
   }
   $message = array (
@@ -24,14 +24,14 @@ function generateMessage($chat_id, $command, $from_id, $from_first_name, $chat_t
         'all_members_are_administrators' => true,
       ),
       'date' => time(),
-      'text' => $command
+      'text' => $text
     )
   );
   if ($isBotCommand) {
     $message['message']['entities'] = array (array (
           'type' => 'bot_command',
           'offset' => 0,
-          'length' => strlen($command),
+          'length' => strlen($text),
         )
       );
   }
