@@ -20,7 +20,7 @@ if (php_sapi_name() == 'cli') {
       array_push($updates, generateMessage(CHAT_ID, $message, FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
     }
   } else if ($argv[1] == '/endpoll') {
-    $updates = generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE);
+    array_push($updates, generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
   }
 } else {
   $response = file_get_contents('php://input');
@@ -29,6 +29,7 @@ if (php_sapi_name() == 'cli') {
 
 $bot->init();
 foreach ($updates as $update) {
+  echo $update['message']['text'] . "\n";
   $bot->onUpdateReceived($update);
   sleep(2);
 }
