@@ -17,7 +17,7 @@ if (php_sapi_name() == 'cli') {
   } else if ($argv[1] == '/newpoll') {
     $messages = array($argv[1], "Wo essen?", "Linde", "Weinberg", "Büro", "andere");
     foreach ($messages as $message) {
-      array_push($updates, generateMessage(CHAT_ID, $message, FROM_ID, FROM_FIRST_NAME, CHAT_TITLE);
+      array_push($updates, generateMessage(CHAT_ID, $message, FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
     }
   } else if ($argv[1] == '/endpoll') {
     $updates = generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE);
