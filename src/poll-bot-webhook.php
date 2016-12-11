@@ -14,7 +14,7 @@ if (php_sapi_name() == 'cli') {
   } else if ($argv[1] == 'remove') {
     $bot->removeWebhook();
     exit;
-  } else if ($argv[1] == '/newpoll') {
+  } else {
     $update = generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE);
   }
 } else {
