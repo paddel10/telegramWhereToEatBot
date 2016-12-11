@@ -26,7 +26,7 @@ function generateMessage($chat_id, $command, $from_id, $from_first_name, $chat_t
       'date' => time(),
       'text' => $command
     )
-  )
+  );
   if ($isBotCommand) {
     $message['message']['entities'] = array (array (
           'type' => 'bot_command',
