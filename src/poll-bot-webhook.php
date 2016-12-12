@@ -15,7 +15,7 @@ if (php_sapi_name() == 'cli') {
     $bot->removeWebhook();
     exit;
   } else if ($argv[1] == '/newpoll') {
-    $messages = array($argv[1], "Wo essen?", "Linde", "Weinberg", "Büro", "andere", "/done");
+    $messages = array($argv[1], "Wo essen? (Abstimmung endet um 10:00)", "Linde", "Weinberg", "Büro", "andere", "/done");
     foreach ($messages as $message) {
       array_push($updates, generateMessage(CHAT_ID, $message, FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
     }
@@ -24,12 +24,15 @@ if (php_sapi_name() == 'cli') {
   }
 } else {
   $response = file_get_contents('php://input');
-  array_push($updates, json_decode($response, true));
+  $update = json_decode($response, true);
+  if ($update['message']['text'] != "/newpoll" ||
+      $update['message']['text'] != "/endpoll") {
+    array_push($updates, $update);
+  }
 }
 
 $bot->init();
 foreach ($updates as $update) {
-  echo $update['message']['text'] . "\n";
   $bot->onUpdateReceived($update);
   sleep(2);
 }
