@@ -487,7 +487,7 @@ class PollBotChat extends TelegramBotChat {
   }
 
   protected function sendOnePollOnly() {
-    $this->apiSendMessage("Sorry, only one poll at a time is allowed.\n/poll - repeat the question\n/endpoll - close current poll");
+    $this->apiSendMessage("Sorry, only one poll at a time is allowed.\n/poll - repeat the question");
   }
 
   protected function sendHelp() {
@@ -496,14 +496,14 @@ class PollBotChat extends TelegramBotChat {
     } else {
       $text = "This bot can create simple polls. You can create a poll and share it to a group.";
     }
-    $text .= "\n\n/newpoll - create a poll\n/results - see how the poll is going\n/poll - repeat the question\n/endpoll - close poll and show final results";
+    $text .= "\n\n/newpoll - create a poll\n/results - see how the poll is going\n/poll - repeat the question";
     $this->apiSendMessage($text);
   }
 
   public function sendPoll($resend = false, $message_id = 0) {
     $text = $this->getPollText($this->curPoll);
     if ($this->isGroup) {
-      $text .= "\n\n/results - show results\n/endpoll - close poll";
+      $text .= "\n\n/results - show results";
     }
     $message_params = array(
       'reply_markup' => array(
@@ -574,7 +574,7 @@ class PollBotChat extends TelegramBotChat {
       $text .= " {$result['procent']}%";
     }
     if (!$final) {
-      $text .= "\n\n/poll - repeat question\n/endpoll - close poll";
+      $text .= "\n\n/poll - repeat question";
     }
 
     $message_params = array();
