@@ -479,11 +479,11 @@ class PollBotChat extends TelegramBotChat {
   }
 
   protected function sendGroupOnly() {
-    $this->apiSendMessage("This command will work in those of your groups that have an active poll. Use /newpoll to create a poll.");
+    $this->apiSendMessage("This command will work in those of your groups that have an active poll.");
   }
 
   protected function sendNoPoll() {
-    $this->apiSendMessage("No active polls in this group. Use /newpoll to create a poll first.");
+    $this->apiSendMessage("No active polls in this group.");
   }
 
   protected function sendOnePollOnly() {
@@ -494,9 +494,9 @@ class PollBotChat extends TelegramBotChat {
     if ($this->isGroup) {
       $text = "This bot can create simple polls in groups.";
     } else {
-      $text = "This bot can create simple polls. You can create a poll and share it to a group.";
+      $text = "This bot can create simple polls.";
     }
-    $text .= "\n\n/newpoll - create a poll\n/results - see how the poll is going\n/poll - repeat the question";
+    $text .= "\n\n/results - see how the poll is going\n/poll - repeat the question";
     $this->apiSendMessage($text);
   }
 
