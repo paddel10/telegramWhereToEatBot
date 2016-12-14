@@ -347,7 +347,9 @@ class PollBotChat extends TelegramBotChat {
     } else {
       $new_vote = $this->dbSelectOption($voter_id, $option_id);
       if ($new_vote) {
-        $text = "☝️{$name} voted for '{$option}'.";
+        // do not return the vote
+        // $text = "☝️{$name} voted for '{$option}'.";
+        return;
       } else {
         $text = "☝️{$name} changed the vote to '{$option}'.";
       }
