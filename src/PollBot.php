@@ -571,7 +571,7 @@ class PollBotChat extends TelegramBotChat {
       $text .= " voted so far.";
     }
     foreach ($results as &$result) {
-      $text .= "\n\n{$result['procent']}% - {$result['label']} – 👥 {$result['value']}";
+      $text .= "\n{$result['procent']}% - {$result['label']} – 👥 {$result['value']}";
       // $text .= ($result['pc'] ? str_repeat('👍', $result['pc']) : '▫️');
       // $text .= " {$result['procent']}%";
     }
