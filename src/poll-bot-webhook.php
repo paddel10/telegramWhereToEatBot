@@ -3,11 +3,17 @@
 require_once 'PollBot.php';
 require_once 'config.php';
 require_once 'injectMessage.php';
+require_once 'holidays.php';
 
 $bot = new PollBot(BOT_TOKEN, 'PollBotChat');
 $updates = array();
 
 if (php_sapi_name() == 'cli') {
+  // check for holidays
+  $holidays = getHolidays();
+  if (in_array(date("d.m.Y"), $holidays)) {
+    return;
+  }
   if ($argv[1] == 'set') {
     $bot->setWebhook(BOT_WEBHOOK);
     exit;
