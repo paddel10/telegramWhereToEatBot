@@ -41,8 +41,6 @@ class PollBotChat extends TelegramBotChat {
     $this->curPoll = $this->dbGetPoll();
   }
 
-
-
   public function command_start($params, $message) {
     if (!$this->isGroup) {
       $this->command_newpoll('', $message);
@@ -214,8 +212,6 @@ class PollBotChat extends TelegramBotChat {
     }
   }
 
-
-
   protected function parsePollParams($params) {
     $params = explode("\n", $params);
     $params = array_map('trim', $params);
@@ -348,7 +344,6 @@ class PollBotChat extends TelegramBotChat {
       $new_vote = $this->dbSelectOption($voter_id, $option_id);
       if ($new_vote) {
         // do not return the vote
-        // $text = "☝️{$name} voted for '{$option}'.";
         return;
       } else {
         $text = "☝️{$name} changed the vote to '{$option}'.";
@@ -358,8 +353,6 @@ class PollBotChat extends TelegramBotChat {
 
     $this->apiSendMessage($text, $message_params);
   }
-
-
 
   protected function getPollText($poll, $plain = false) {
     $text = $poll['title']."\n";
@@ -385,8 +378,6 @@ class PollBotChat extends TelegramBotChat {
     $username = strtolower($this->core->botUsername);
     return "telegram.me/{$username}?startgroup={$poll_id}";
   }
-
-
 
   protected function dbGetPoll() {
     $poll_str = $this->redis->get('c'.$this->chatId.':poll');
@@ -474,8 +465,6 @@ class PollBotChat extends TelegramBotChat {
     return $added;
   }
 
-
-
   protected function sendGreeting() {
     $this->apiSendMessage("To create a new poll, send me a message exactly in this format:\n\n/newpoll\nYour question\nAnswer option 1\nAnswer option 2\n...\nAnswer option x");
   }
@@ -520,15 +509,6 @@ class PollBotChat extends TelegramBotChat {
   }
 
   protected function sendPollCreated($poll) {
-    $text = "👍 Poll created.";
-    if (!$this->isGroup) {
-      $text .= " Use this link to share it to a group:\n";
-      $text .= $this->getPollLink($poll['id']);
-      $text .= "\n\n";
-      $text .= $this->getPollText($poll, true);
-    }
-    $this->apiSendMessage($text);
-
     if ($this->isGroup) {
       $this->sendPoll();
     }
@@ -554,27 +534,31 @@ class PollBotChat extends TelegramBotChat {
     uasort($results, function($a, $b) { return ($b['value'] - $a['value']); });
 
     $text = '';
-    if ($final) {
-      $text .= "📊 Poll closed, final results:\n\n";
-    }
-    $text .= $this->curPoll['title']."\n";
-    if (!$total_value) {
-      $text .= "👥 Nobody";
-    } else if ($total_value == 1) {
-      $text .= "👥 1 person";
+    if ($final && !$total_value) {
+      $text .= "Poll closed, nobody voted...\n\n";
     } else {
-      $text .= "👥 {$total_value} people";
-    }
-    if ($final) {
-      $text .= " voted in total.";
-    } else {
-      $text .= " voted so far.";
-    }
-    foreach ($results as &$result) {
-      $text .= "\n{$result['procent']}% - {$result['label']} – 👥 {$result['value']}";
-      // $text .= ($result['pc'] ? str_repeat('👍', $result['pc']) : '▫️');
-      // $text .= " {$result['procent']}%";
-    }
+      if ($final) {
+        $text .= "📊 Poll closed, final results:\n\n";
+      }
+      if (!$total_value) {
+        $text .= "👥 Nobody";
+      } else if ($total_value == 1) {
+        $text .= "👥 1 person";
+      } else {
+        $text .= "👥 {$total_value} people";
+      }
+      if ($final) {
+        $text .= " voted in total.";
+      } else {
+        $text .= " voted so far.";
+      }
+      foreach ($results as &$result) {
+        if (!($final && $result['value'] == 0)) {
+          // do not display individual result when final and result is 0
+          $text .= "\n{$result['procent']}% - {$result['label']} – 👥 {$result['value']}";
+        } 
+      }
+    } 
     if (!$final) {
       $text .= "\n\n/poll - repeat question";
     }

@@ -10,26 +10,26 @@ $updates = array();
 
 if (php_sapi_name() == 'cli') {
   // check for holidays
+  $today = date("d.m.Y");
+  $tomorrow = date("d.m.Y", strtotime(date("d.m.Y") . ' + 1 day'));
   $holidays = getHolidays();
-  if (in_array(date("d.m.Y"), $holidays)) {
-    return;
-  }
-  if ($argv[1] == 'set') {
+  
+if ($argv[1] == 'set') {
     $bot->setWebhook(BOT_WEBHOOK);
     exit;
   } else if ($argv[1] == 'remove') {
     $bot->removeWebhook();
     exit;
-  } else if ($argv[1] == '/newpoll') {
-    $messages = array($argv[1], "Wo essen?", "Linde", "Weinberg", "Büro/Grill", "Chinesisch", "Sushi", "Niederdorf", "andere", "/done");
-    if(5 == (int)date('N')) {
-      // it's friday
-      $messages = array($argv[1], "Wo essen? (Friday special)", "Jimmy's", "Weinberg", "Büro/Grill", "Portugies", "Sushi", "Niederdorf", "andere", "/done");
+  } else if ($argv[1] == '/newpoll' && !in_array($tomorrow, $holidays)) {
+    $messages = array($argv[1], "Wo essen?", "Linde", "Weinberg", "Büro/Grill", "Culmann", "Alter Löwe", "Chinesisch", "Sushi", "Niederdorf", "andere", "/done");
+    if(4 == (int)date('N')) {
+      // tomorrow it's friday
+      //$messages = array($argv[1], "Wo essen? (Friday special)", "Jimmy's", "Weinberg", "Büro/Grill", "Portugies", "Sushi", "Niederdorf", "andere", "/done");
     }
     foreach ($messages as $message) {
       array_push($updates, generateMessage(CHAT_ID, $message, FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
     }
-  } else if ($argv[1] == '/endpoll') {
+  } else if ($argv[1] == '/endpoll' && !in_array($today, $holidays)) {
     array_push($updates, generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
   }
 } else {
