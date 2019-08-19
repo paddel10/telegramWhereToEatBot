@@ -93,7 +93,8 @@ abstract class TelegramBotCore {
     $url = $this->apiUrl.'/'.$method;
 
     if ($options['http_method'] === 'POST') {
-      curl_setopt($this->handle, CURLOPT_SAFE_UPLOAD, false);
+      // curl_setopt($this->handle, CURLOPT_SAFE_UPLOAD, false);
+      curl_setopt($this->handle, CURLOPT_HTTPHEADER, array('Content-Type:multipart/form-data'));
       curl_setopt($this->handle, CURLOPT_POST, true);
       curl_setopt($this->handle, CURLOPT_POSTFIELDS, $query_string);
     } else {
@@ -123,6 +124,8 @@ abstract class TelegramBotCore {
     }
 
     $response = json_decode($response_str, true);
+
+    error_log($response_str);
 
     return $response;
   }
@@ -265,7 +268,7 @@ abstract class TelegramBotChat {
   protected function apiSendPhoto($path) {
       $params = array(
         'chat_id' => $this->chatId,
-        'photo' => $path
+        'photo' => new CURLFile(realpath($path))
       );
       return $this->core->request('sendPhoto', $params);
   }
