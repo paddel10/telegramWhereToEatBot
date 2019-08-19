@@ -1,4 +1,3 @@
-
 .idea/$CACHE_FILE$
 .idea/misc.xml
 .idea/modules.xml
@@ -12,3 +11,4 @@
 .idea/vcs.xml
 src/menu/weinberg.jpg
 src/menu/weinberg.png
+src/config.php
