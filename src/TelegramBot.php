@@ -125,8 +125,6 @@ abstract class TelegramBotCore {
 
     $response = json_decode($response_str, true);
 
-    error_log($response_str);
-
     return $response;
   }
 
