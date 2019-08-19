@@ -25,7 +25,7 @@ if (php_sapi_name() === 'cli') {
 
         // crop
         $imagick = new \Imagick(MENU_PATH . LINDE_JPG);
-        $imagick->cropImage(709, 424, 350, 1338);
+        $imagick->cropImage(709, 424, 327, 1338);
         file_put_contents(MENU_PATH . LINDE_PNG, $imagick->getImageBlob());
     }
 }
