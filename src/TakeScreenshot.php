@@ -37,6 +37,7 @@ class TakeScreenshot
             'Content-Length: ' . strlen($payload))
         );
         $result = curl_exec($ch);
+        curl_close($ch);
         //var_dump($result);
         $this->result = json_decode($result);
     }

@@ -1,21 +1,19 @@
 <?php
 
-class ExtractLink
+
+class ExtractLinkCulmann
 {
     /** @var string */
-    private $baseUrl = 'https://de-de.facebook.com';
+    private $baseUrl = 'https://www.culmann.ch';
 
     /** @var string */
-    private $url = 'https://de-de.facebook.com/pages/category/Tapas-Bar---Restaurant/Caf%C3%A9-Weinberg-1096263017161601/';
+    private $url = 'https://www.culmann.ch/essen-trinken/';
 
     /** @var string */
-    private $pattern = '/href="(\/permalink.php\?.*?)"/';
+    private $pattern = '/<a href="(\/app\/download\/.*?)"/';
 
     public function extract(): string
     {
-        // url: https://de-de.facebook.com/pages/category/Tapas-Bar---Restaurant/Caf%C3%A9-Weinberg-1096263017161601/
-        // pattern: href="/permalink.php?
-        //$content = file_get_contents($this->url);
         $userAgent = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 GTB5';
         $ch = curl_init($this->url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
@@ -31,6 +29,4 @@ class ExtractLink
         }
         return '';
     }
-
-
 }
