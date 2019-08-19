@@ -141,6 +141,10 @@ class PollBotChat extends TelegramBotChat {
     $this->sendHelp();
   }
 
+  public function command_menu($params, $message) {
+      $this->sendMenu($params);
+  }
+
   public function bot_added_to_chat($message) {
     $this->sendHelp();
   }
@@ -489,6 +493,16 @@ class PollBotChat extends TelegramBotChat {
     }
     $text .= "\n\n/results - see how the poll is going\n/poll - repeat the question";
     $this->apiSendMessage($text);
+  }
+
+  protected function sendMenu($location) {
+      switch ($location) {
+          case 'weinberg':
+              $this->apiSendPhoto('/var/www/html/patland.ch/tgram/whereToEat/src/menu/weinberg.png');
+              break;
+          default:
+              break;
+      }
   }
 
   public function sendPoll($resend = false, $message_id = 0) {
