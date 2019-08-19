@@ -263,10 +263,10 @@ abstract class TelegramBotChat {
     return $this->core->request('sendMessage', $params);
   }
 
-  protected function apiSendPhoto($path) {
+  protected function apiSendPhoto($url) {
       $params = array(
         'chat_id' => $this->chatId,
-        'photo' => new CURLFile(realpath($path))
+        'photo' => $url
       );
       return $this->core->request('sendPhoto', $params);
   }
