@@ -31,6 +31,8 @@ if ($argv[1] == 'set') {
     }
   } else if ($argv[1] == '/endpoll' && !in_array($today, $holidays)) {
     array_push($updates, generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
+  } else if (substr($argv[1], 0, strlen('/menu')) == '/menu') {
+    array_push($updates, generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
   }
 } else {
   $response = file_get_contents('php://input');
