@@ -498,13 +498,13 @@ class PollBotChat extends TelegramBotChat {
   protected function sendMenu($location) {
       switch ($location) {
           case 'weinberg':
-              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/weinberg.png?t=' . time());
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/weinberg.png?t=' . time(), 'Weinberg');
               break;
           case 'linde':
-              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/linde.png?t=' . time());
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/linde.png?t=' . time(), 'Linde');
               break;
           case 'culmann':
-              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/culmannSlice.jpg?t=' . time());
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/culmannSlice.jpg?t=' . time(), 'Culmann');
               break;
           default:
               break;
