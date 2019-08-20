@@ -496,6 +496,7 @@ class PollBotChat extends TelegramBotChat {
   }
 
   protected function sendMenu($location) {
+      $location = strtolower($location);
       switch ($location) {
           case 'weinberg':
               $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/weinberg.png?t=' . time(), 'Weinberg');
