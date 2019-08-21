@@ -6,13 +6,6 @@ const LOEWE_PDF = 'loewe.pdf';
 const LOEWE_JPG = 'loewe.jpg';
 const LOEWE_SLICE_JPG = 'loeweSlice.jpg';
 
-$weekdayMap = [
-    1 => [329, 384],
-    2 => [912, 384],
-    3 => [1480, 384],
-    4 => [2040, 384],
-    5 => [2580, 384],
-];
 if (php_sapi_name() === 'cli') {
     $link = 'https://www.pogastro.com/view/menu-pdf?venue=36946-restaurant-z-alten-loewen&type=daily&menu=1&template=venue_daily_newtemplate';
     if (!empty($link)) {
@@ -73,10 +66,9 @@ if (php_sapi_name() === 'cli') {
         $image->setImageFormat( 'jpg' );
         $image->writeImage(MENU_PATH . LOEWE_JPG);
 
-        // crop
-        /*$size = $weekdayMap[date('N')];
+        // scale
         $imagick = new \Imagick(MENU_PATH . LOEWE_JPG);
-        $imagick->cropImage(630, 1680, $size[0], $size[1]);
-        file_put_contents(MENU_PATH . LOEWE_SLICE_JPG, $imagick->getImageBlob());*/
+        $imagick->scaleImage(800, 0);
+        file_put_contents(MENU_PATH . LOEWE_SLICE_JPG, $imagick->getImageBlob());
     }
 }
