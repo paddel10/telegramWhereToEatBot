@@ -68,7 +68,7 @@ if (php_sapi_name() === 'cli') {
 
         // scale
         $imagick = new \Imagick(MENU_PATH . LOEWE_JPG);
-        $imagick->scaleImage(800, 0);
+        $imagick->scaleImage(600, 0);
         file_put_contents(MENU_PATH . LOEWE_SLICE_JPG, $imagick->getImageBlob());
     }
 }
