@@ -34,7 +34,7 @@ if (php_sapi_name() === 'cli') {
         // close curl resource to free up system resources
         curl_close($ch);
 
-        // convert to png
+        // convert to image
         $image = new Imagick();
         $image->setResolution( 300, 300 );
         $image->readImage(MENU_PATH . CULMANN_PDF);
