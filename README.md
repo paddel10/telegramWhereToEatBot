@@ -6,7 +6,7 @@ Active Poll displayed:<br>
 <img src="src/images/start-poll.jpg" height="480"><br>
 Poll closed:<br>
 <img src="src/images/end-poll.jpg" height="480"><br>
-Display menu of a restaurant:<br>
+Display menu of a restaurant (`/menu loewe`):<br>
 <img src="src/images/menu-command.jpg" height="480"><br>
 
 ## Usage
