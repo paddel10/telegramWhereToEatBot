@@ -32,7 +32,9 @@ sudo php poll-bot-webhook.php /endpoll
 ```
 sudo php poll-bot-webhook.php /newpoll
 ```
-
+```
+sudo php poll-bot-webhook.php /menu <restaurant>
+```
 ## Automatisation
 Use cron to start and end a poll automatically and display the menus of the day on weekdays.
 ```
