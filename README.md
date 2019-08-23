@@ -2,14 +2,14 @@
 Telegram Bot sets up a poll so users in a group can vote for a place to eat lunch. Menus of the restaurants can be displayed.
 
 ## Screenshots
-|Active Poll displayed:|
-|<img src="src/images/start-poll.jpg" height="480">|
-|Select option:|
-|<img src="src/images/select.jpg" height="480">|
-|Poll closed:|
-|<img src="src/images/end-poll.jpg" height="480">|
-|Display menu of a restaurant (`/menu loewe`):|
-|<img src="src/images/menu-command.jpg" height="480">|
+Active Poll displayed:<br>
+<img src="src/images/start-poll.jpg" height="480"><br>
+Select option:<br>
+<img src="src/images/select.jpg" height="480"><br>
+Poll closed:<br>
+<img src="src/images/end-poll.jpg" height="480"><br>
+Display menu of a restaurant (`/menu loewe`):<br>
+<img src="src/images/menu-command.jpg" height="480"><br>
 
 ## Usage
 ```
