@@ -4,6 +4,8 @@ Telegram Bot sets up a poll so users in a group can vote for a place to eat lunc
 ## Screenshots
 Active Poll displayed:<br>
 <img src="src/images/start-poll.jpg" height="480"><br>
+Select option:<br>
+<img src="src/images/select.jpg" height="480"><br>
 Poll closed:<br>
 <img src="src/images/end-poll.jpg" height="480"><br>
 Display menu of a restaurant (`/menu loewe`):<br>
