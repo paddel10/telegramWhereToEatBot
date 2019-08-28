@@ -510,6 +510,9 @@ class PollBotChat extends TelegramBotChat {
           case 'loewe':
               $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/loeweSlice.jpg?t=' . time(), 'zum Alten Löwen');
               break;
+          case 'eth':
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/eth.png?t=' . time(), 'ETH Polyterrasse');
+              break;
           default:
               break;
       }
