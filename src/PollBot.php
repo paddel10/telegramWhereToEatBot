@@ -520,13 +520,13 @@ class PollBotChat extends TelegramBotChat {
               $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/johanniterSlice.jpg?t=' . time(), 'Johanniter');
               break;
           default:
-              $text = '/menu weinberg\n';
-              $text .= '/menu linde\n';
-              $text .= '/menu culmann\n';
-              $text .= '/menu loewe\n';
-              $text .= '/menu eth\n';
-              $text .= '/menu n68\n';
-              $text .= '/menu johanniter\n';
+              $text = "/menu weinberg\n";
+              $text .= "/menu linde\n";
+              $text .= "/menu culmann\n";
+              $text .= "/menu loewe\n";
+              $text .= "/menu eth\n";
+              $text .= "/menu n68\n";
+              $text .= "/menu johanniter\n";
               $this->apiSendMessage($text);
               break;
       }
