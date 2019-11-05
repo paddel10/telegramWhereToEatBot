@@ -37,6 +37,6 @@ if (php_sapi_name() === 'cli') {
     // crop
     $imagick = new \Imagick(MENU_PATH . N68_JPG);
     // int $width , int $height , int $x , int $y
-    $imagick->cropImage(1400, 1200, $size[0], $size[1]);
+    $imagick->cropImage(1400, 1700, $size[0], $size[1]);
     file_put_contents(MENU_PATH . N68_SLICE_JPG, $imagick->getImageBlob());
 }
