@@ -39,8 +39,6 @@ if (php_sapi_name() === 'cli') {
         // crop
         $imagick = new \Imagick(MENU_PATH . JOHANNITER_JPG);
         $imagick->cropImage(2500, 2100, $size[0], $size[1]);
-        // resize
-        echo $imagick->resizeImage(1024, 0, 0, 0);
         file_put_contents(MENU_PATH . JOHANNITER_SLICE_JPG, $imagick->getImageBlob());
     }
 }
