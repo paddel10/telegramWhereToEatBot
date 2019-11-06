@@ -7,7 +7,7 @@ const JOHANNITER_PDF = 'johanniter.pdf';
 const JOHANNITER_JPG = 'johanniter.jpg';
 const JOHANNITER_SLICE_JPG = 'johanniterSlice.jpg';
 
-$size = [190, 250];
+$size = [800, 1400];
 
 if (php_sapi_name() === 'cli') {
     $extractLink = new ExtractLinkJohanniter();
@@ -38,7 +38,7 @@ if (php_sapi_name() === 'cli') {
 
         // crop
         $imagick = new \Imagick(MENU_PATH . JOHANNITER_JPG);
-        $imagick->cropImage(1400, 1850, $size[0], $size[1]);
+        $imagick->cropImage(2500, 2100, $size[0], $size[1]);
         file_put_contents(MENU_PATH . JOHANNITER_SLICE_JPG, $imagick->getImageBlob());
     }
 }
