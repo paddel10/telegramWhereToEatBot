@@ -15,11 +15,11 @@ if (php_sapi_name() === 'cli') {
 class GetMenuCulmann
 {
     private $weekdayMap = [
-        1 => [329, 384],
-        2 => [912, 384],
-        3 => [1480, 384],
-        4 => [2040, 384],
-        5 => [2580, 384]
+        1 => [329, 300],
+        2 => [912, 300],
+        3 => [1480, 300],
+        4 => [2040, 300],
+        5 => [2580, 300]
     ];
 
     /**
@@ -56,7 +56,7 @@ class GetMenuCulmann
             // crop
             $size = $this->weekdayMap[date('N')];
             $imagick = new \Imagick(MENU_PATH . CULMANN_JPG);
-            $imagick->cropImage(630, 1680, $size[0], $size[1]);
+            $imagick->cropImage(630, 2000, $size[0], $size[1]);
             file_put_contents(MENU_PATH . CULMANN_SLICE_JPG, $imagick->getImageBlob());
         }
     }
