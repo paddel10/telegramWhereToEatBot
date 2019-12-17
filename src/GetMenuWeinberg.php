@@ -8,23 +8,35 @@ const WEINBERG_PNG = 'weinberg.png';
 
 if (php_sapi_name() === 'cli') {
     $apiKey = $argv[1];
+    $menu = new GetMenuWeinberg();
+    $menu->getMenu($apiKey);
+}
 
-    $extractLink = new ExtractLink();
-    $link = $extractLink->extract();
-    $base64 = '';
+class GetMenuWeinberg
+{
+    /**
+     * @param string $apiKey
+     * @throws ImagickException
+     */
+    public function getMenu(string $apiKey): void
+    {
+        $extractLink = new ExtractLink();
+        $link = $extractLink->extract();
+        $base64 = '';
 
-    if (!empty($link)) {
-        $takeScreenshot = new TakeScreenshot($apiKey);
-        $takeScreenshot->getScreenshot($link);
-        $base64 = $takeScreenshot->getBase64();
-    }
-    if (!empty($base64)) {
-        $content = file_get_contents($takeScreenshot->getPath());
-        file_put_contents(MENU_PATH . WEINBERG_JPG, $content);
+        if (!empty($link)) {
+            $takeScreenshot = new TakeScreenshot($apiKey);
+            $takeScreenshot->getScreenshot($link);
+            $base64 = $takeScreenshot->getBase64();
+        }
+        if (!empty($base64)) {
+            $content = file_get_contents($takeScreenshot->getPath());
+            file_put_contents(MENU_PATH . WEINBERG_JPG, $content);
 
-        // crop
-        $imagick = new \Imagick(MENU_PATH . WEINBERG_JPG);
-        $imagick->cropImage(516, 650, 188, 95);
-        file_put_contents(MENU_PATH . WEINBERG_PNG, $imagick->getImageBlob());
+            // crop
+            $imagick = new \Imagick(MENU_PATH . WEINBERG_JPG);
+            $imagick->cropImage(516, 650, 188, 95);
+            file_put_contents(MENU_PATH . WEINBERG_PNG, $imagick->getImageBlob());
+        }
     }
 }

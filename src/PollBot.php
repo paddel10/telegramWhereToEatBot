@@ -1,6 +1,13 @@
 <?php
 
 require_once 'TelegramBot.php';
+require_once 'GetMenuCulmann.php';
+require_once 'GetMenuEth.php';
+require_once 'GetMenuJohanniter.php';
+require_once 'GetMenuLinde.php';
+require_once 'GetMenuLoewe.php';
+require_once 'GetMenuN68.php';
+require_once 'GetMenuWeinberg.php';
 
 class PollBot extends TelegramBot {
 
@@ -143,6 +150,10 @@ class PollBotChat extends TelegramBotChat {
 
   public function command_menu($params, $message) {
       $this->sendMenu($params);
+  }
+
+  public function command_update($params, $message) {
+      $this->updateMenu($params);
   }
 
   public function bot_added_to_chat($message) {
@@ -493,6 +504,61 @@ class PollBotChat extends TelegramBotChat {
     }
     $text .= "\n\n/results - see how the poll is going\n/poll - repeat the question";
     $this->apiSendMessage($text);
+  }
+
+    /**
+     * @param $location
+     * @throws ImagickException
+     */
+    protected function updateMenu($location) {
+      $location = strtolower($location);
+      switch ($location) {
+          case 'weinberg':
+              $menu = new GetMenuWeinberg();
+              $menu->getMenu(IMG_API_KEY);
+              $this->sendMenu('Weinberg');
+              break;
+          case 'linde':
+              $menu = new GetMenuLinde();
+              $menu->getMenu(IMG_API_KEY);
+              $this->sendMenu('Linde');
+              break;
+          case 'culmann':
+              $menu = new GetMenuCulmann();
+              $menu->getMenu();
+              $this->sendMenu('Culmann');
+              break;
+          case 'loewe':
+              $menu = new GetMenuLoewe();
+              $menu->sendMenu();
+              $this->sendMenu('Loewe');
+              break;
+          case 'eth':
+              $menu = new GetMenuEth();
+              $menu->getMenu(IMG_API_KEY);
+              $this->sendMenu('ETH Polyterrasse');
+              break;
+          case 'n68':
+              $menu = new GetMenuN68();
+              $menu->getMenu();
+              $this->sendMenu('N68');
+              break;
+          case 'johanniter':
+              $menu = new GetMenuJohanniter();
+              $menu->getMenu();
+              $this->sendMenu('Johanniter');
+              break;
+          default:
+              $text = "/update weinberg\n";
+              $text .= "/update linde\n";
+              $text .= "/update culmann\n";
+              $text .= "/update loewe\n";
+              $text .= "/update eth\n";
+              $text .= "/update n68\n";
+              $text .= "/update johanniter\n";
+              $this->apiSendMessage($text);
+              break;
+      }
   }
 
   protected function sendMenu($location) {
