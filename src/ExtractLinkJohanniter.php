@@ -3,7 +3,7 @@
 class ExtractLinkJohanniter
 {
     /** @var string */
-    private $url = 'https://johanniter.com/en/restaurant-2/1339-2/';
+    private $url = 'https://johanniter.com/en/restaurant/tagesmenue-2/';
 
     /** @var string */
     // <a href="https://johanniter.com/wp-content/uploads/2019/10/25.10.2019-Käsehörnli-Tagesmenü.pdf" class="pdfemb-viewer" style="" data-width="max" data-height="max"  data-toolbar="top" data-toolbar-fixed="off">25.10.2019-Käsehörnli-Tagesmenü<br/></a>

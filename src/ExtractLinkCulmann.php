@@ -10,7 +10,7 @@ class ExtractLinkCulmann
     private $url = 'https://www.culmann.ch/essen-trinken/';
 
     /** @var string */
-    private $pattern = '/<a href="(\/app\/download\/.*?)"/';
+    private $pattern = '/<a href="(\/app\/download\/.*?Tagesmenu.*?)"/';
 
     public function extract(): string
     {
