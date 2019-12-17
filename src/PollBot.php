@@ -502,7 +502,7 @@ class PollBotChat extends TelegramBotChat {
     } else {
       $text = "This bot can create simple polls.";
     }
-    $text .= "\n\n/results - see how the poll is going\n/poll - repeat the question";
+    $text .= "\n\n/results - see how the poll is going\n/poll - repeat the question\n/menu - list menus\n/update - update menus\n";
     $this->apiSendMessage($text);
   }
 
