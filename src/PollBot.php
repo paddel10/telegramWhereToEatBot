@@ -1,6 +1,13 @@
 <?php
 
 require_once 'TelegramBot.php';
+require_once 'GetMenuCulmann.php';
+require_once 'GetMenuEth.php';
+require_once 'GetMenuJohanniter.php';
+require_once 'GetMenuLinde.php';
+require_once 'GetMenuLoewe.php';
+require_once 'GetMenuN68.php';
+require_once 'GetMenuWeinberg.php';
 
 class PollBot extends TelegramBot {
 
@@ -40,8 +47,6 @@ class PollBotChat extends TelegramBotChat {
   public function init() {
     $this->curPoll = $this->dbGetPoll();
   }
-
-
 
   public function command_start($params, $message) {
     if (!$this->isGroup) {
@@ -143,6 +148,14 @@ class PollBotChat extends TelegramBotChat {
     $this->sendHelp();
   }
 
+  public function command_menu($params, $message) {
+      $this->sendMenu($params);
+  }
+
+  public function command_update($params, $message) {
+      $this->updateMenu($params);
+  }
+
   public function bot_added_to_chat($message) {
     $this->sendHelp();
   }
@@ -213,8 +226,6 @@ class PollBotChat extends TelegramBotChat {
       }
     }
   }
-
-
 
   protected function parsePollParams($params) {
     $params = explode("\n", $params);
@@ -347,7 +358,8 @@ class PollBotChat extends TelegramBotChat {
     } else {
       $new_vote = $this->dbSelectOption($voter_id, $option_id);
       if ($new_vote) {
-        $text = "☝️{$name} voted for '{$option}'.";
+        // do not return the vote
+        return;
       } else {
         $text = "☝️{$name} changed the vote to '{$option}'.";
       }
@@ -356,8 +368,6 @@ class PollBotChat extends TelegramBotChat {
 
     $this->apiSendMessage($text, $message_params);
   }
-
-
 
   protected function getPollText($poll, $plain = false) {
     $text = $poll['title']."\n";
@@ -383,8 +393,6 @@ class PollBotChat extends TelegramBotChat {
     $username = strtolower($this->core->botUsername);
     return "telegram.me/{$username}?startgroup={$poll_id}";
   }
-
-
 
   protected function dbGetPoll() {
     $poll_str = $this->redis->get('c'.$this->chatId.':poll');
@@ -472,38 +480,128 @@ class PollBotChat extends TelegramBotChat {
     return $added;
   }
 
-
-
   protected function sendGreeting() {
     $this->apiSendMessage("To create a new poll, send me a message exactly in this format:\n\n/newpoll\nYour question\nAnswer option 1\nAnswer option 2\n...\nAnswer option x");
   }
 
   protected function sendGroupOnly() {
-    $this->apiSendMessage("This command will work in those of your groups that have an active poll. Use /newpoll to create a poll.");
+    $this->apiSendMessage("This command will work in those of your groups that have an active poll.");
   }
 
   protected function sendNoPoll() {
-    $this->apiSendMessage("No active polls in this group. Use /newpoll to create a poll first.");
+    $this->apiSendMessage("No active polls in this group.");
   }
 
   protected function sendOnePollOnly() {
-    $this->apiSendMessage("Sorry, only one poll at a time is allowed.\n/poll - repeat the question\n/endpoll - close current poll");
+    $this->apiSendMessage("Sorry, only one poll at a time is allowed.\n/poll - repeat the question");
   }
 
   protected function sendHelp() {
     if ($this->isGroup) {
       $text = "This bot can create simple polls in groups.";
     } else {
-      $text = "This bot can create simple polls. You can create a poll and share it to a group.";
+      $text = "This bot can create simple polls.";
     }
-    $text .= "\n\n/newpoll - create a poll\n/results - see how the poll is going\n/poll - repeat the question\n/endpoll - close poll and show final results";
+    $text .= "\n\n/results - see how the poll is going\n/poll - repeat the question\n/menu - list menus\n/update - update menus\n";
     $this->apiSendMessage($text);
+  }
+
+    /**
+     * @param $location
+     * @throws ImagickException
+     */
+    protected function updateMenu($location) {
+      $location = strtolower($location);
+      switch ($location) {
+          case 'weinberg':
+              $menu = new GetMenuWeinberg();
+              $menu->getMenu(IMG_API_KEY);
+              $this->sendMenu('Weinberg');
+              break;
+          case 'linde':
+              $menu = new GetMenuLinde();
+              $menu->getMenu(IMG_API_KEY);
+              $this->sendMenu('Linde');
+              break;
+          case 'culmann':
+              $menu = new GetMenuCulmann();
+              $menu->getMenu();
+              $this->sendMenu('Culmann');
+              break;
+          case 'loewe':
+              $menu = new GetMenuLoewe();
+              $menu->sendMenu();
+              $this->sendMenu('Loewe');
+              break;
+          case 'eth':
+              $menu = new GetMenuEth();
+              $menu->getMenu(IMG_API_KEY);
+              $this->sendMenu('ETH Polyterrasse');
+              break;
+          case 'n68':
+              $menu = new GetMenuN68();
+              $menu->getMenu();
+              $this->sendMenu('N68');
+              break;
+          case 'johanniter':
+              $menu = new GetMenuJohanniter();
+              $menu->getMenu();
+              $this->sendMenu('Johanniter');
+              break;
+          default:
+              $text = "/update weinberg\n";
+              $text .= "/update linde\n";
+              $text .= "/update culmann\n";
+              $text .= "/update loewe\n";
+              $text .= "/update eth\n";
+              $text .= "/update n68\n";
+              $text .= "/update johanniter\n";
+              $this->apiSendMessage($text);
+              break;
+      }
+  }
+
+  protected function sendMenu($location) {
+      $location = strtolower($location);
+      switch ($location) {
+          case 'weinberg':
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/weinberg.png?t=' . time(), 'Weinberg');
+              break;
+          case 'linde':
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/linde.png?t=' . time(), 'Linde');
+              break;
+          case 'culmann':
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/culmannSlice.jpg?t=' . time(), 'Culmann');
+              break;
+          case 'loewe':
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/loeweSlice.jpg?t=' . time(), 'zum Alten Löwen');
+              break;
+          case 'eth':
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/eth.png?t=' . time(), 'ETH Polyterrasse');
+              break;
+          case 'n68':
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/n68Slice.jpg?t=' . time(), 'N68');
+              break;
+          case 'johanniter':
+              $this->apiSendPhoto('https://patland.ch/tgram/whereToEat/src/menu/johanniterSlice.jpg?t=' . time(), 'Johanniter');
+              break;
+          default:
+              $text = "/menu weinberg\n";
+              $text .= "/menu linde\n";
+              $text .= "/menu culmann\n";
+              $text .= "/menu loewe\n";
+              $text .= "/menu eth\n";
+              $text .= "/menu n68\n";
+              $text .= "/menu johanniter\n";
+              $this->apiSendMessage($text);
+              break;
+      }
   }
 
   public function sendPoll($resend = false, $message_id = 0) {
     $text = $this->getPollText($this->curPoll);
     if ($this->isGroup) {
-      $text .= "\n\n/results - show results\n/endpoll - close poll";
+      $text .= "\n\n/results - show results";
     }
     $message_params = array(
       'reply_markup' => array(
@@ -518,15 +616,6 @@ class PollBotChat extends TelegramBotChat {
   }
 
   protected function sendPollCreated($poll) {
-    $text = "👍 Poll created.";
-    if (!$this->isGroup) {
-      $text .= " Use this link to share it to a group:\n";
-      $text .= $this->getPollLink($poll['id']);
-      $text .= "\n\n";
-      $text .= $this->getPollText($poll, true);
-    }
-    $this->apiSendMessage($text);
-
     if ($this->isGroup) {
       $this->sendPoll();
     }
@@ -552,29 +641,33 @@ class PollBotChat extends TelegramBotChat {
     uasort($results, function($a, $b) { return ($b['value'] - $a['value']); });
 
     $text = '';
-    if ($final) {
-      $text .= "📊 Poll closed, final results:\n\n";
-    }
-    $text .= $this->curPoll['title']."\n";
-    if (!$total_value) {
-      $text .= "👥 Nobody";
-    } else if ($total_value == 1) {
-      $text .= "👥 1 person";
+    if ($final && !$total_value) {
+      $text .= "Poll closed, nobody voted...\n\n";
     } else {
-      $text .= "👥 {$total_value} people";
-    }
-    if ($final) {
-      $text .= " voted in total.";
-    } else {
-      $text .= " voted so far.";
-    }
-    foreach ($results as &$result) {
-      $text .= "\n\n{$result['label']} – {$result['value']}\n";
-      $text .= ($result['pc'] ? str_repeat('👍', $result['pc']) : '▫️');
-      $text .= " {$result['procent']}%";
-    }
+      if ($final) {
+        $text .= "📊 Poll closed, final results:\n\n";
+      }
+      if (!$total_value) {
+        $text .= "👥 Nobody";
+      } else if ($total_value == 1) {
+        $text .= "👥 1 person";
+      } else {
+        $text .= "👥 {$total_value} people";
+      }
+      if ($final) {
+        $text .= " voted in total.";
+      } else {
+        $text .= " voted so far.";
+      }
+      foreach ($results as &$result) {
+        if (!($final && $result['value'] == 0)) {
+          // do not display individual result when final and result is 0
+          $text .= "\n{$result['procent']}% - {$result['label']} – 👥 {$result['value']}";
+        } 
+      }
+    } 
     if (!$final) {
-      $text .= "\n\n/poll - repeat question\n/endpoll - close poll";
+      $text .= "\n\n/poll - repeat question";
     }
 
     $message_params = array();

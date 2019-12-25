@@ -93,7 +93,8 @@ abstract class TelegramBotCore {
     $url = $this->apiUrl.'/'.$method;
 
     if ($options['http_method'] === 'POST') {
-      curl_setopt($this->handle, CURLOPT_SAFE_UPLOAD, false);
+      // curl_setopt($this->handle, CURLOPT_SAFE_UPLOAD, false);
+      curl_setopt($this->handle, CURLOPT_HTTPHEADER, array('Content-Type:multipart/form-data'));
       curl_setopt($this->handle, CURLOPT_POST, true);
       curl_setopt($this->handle, CURLOPT_POSTFIELDS, $query_string);
     } else {
@@ -192,11 +193,17 @@ class TelegramBot extends TelegramBotCore {
           $username_len = strlen($username);
           if (strtolower(substr($text, 0, $username_len)) == $username) {
             $text = trim(substr($text, $username_len));
-          }
-          if (preg_match('/^(?:\/([a-z0-9_]+)(@[a-z0-9_]+)?(?:\s+(.*))?)$/is', $text, $matches)) {
-            $command = $matches[1];
-            $command_owner = strtolower($matches[2]);
-            $command_params = $matches[3];
+	  }
+	  if (preg_match('/^(?:\/([a-z0-9_]+)(@[a-z0-9_]+)?(?:\s+(.*))?)$/is', $text, $matches)) {
+	    $command = $matches[1];
+	    $command_owner = '';
+	    $command_params = '';
+	    if (array_key_exists(2, $matches)) {
+		$command_owner = strtolower($matches[2]);
+	    }
+	    if (array_key_exists(3, $matches)) {
+		$command_params = (isset($matches[3]) ? $matches[3] : '');
+	    }
             if (!$command_owner || $command_owner == $username) {
               $method = 'command_'.$command;
               if (method_exists($chat, $method)) {
@@ -254,6 +261,15 @@ abstract class TelegramBotChat {
       'text' => $text,
     );
     return $this->core->request('sendMessage', $params);
+  }
+
+  protected function apiSendPhoto($url, $caption) {
+      $params = array(
+        'chat_id' => $this->chatId,
+        'photo' => $url,
+        'caption' => $caption
+      );
+      return $this->core->request('sendPhoto', $params);
   }
 
 }
