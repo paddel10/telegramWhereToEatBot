@@ -32,6 +32,10 @@ if ($argv[1] == 'set') {
   } else if ($argv[1] == '/endpoll' && !in_array($today, $holidays)) {
     array_push($updates, generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
   } else if (substr($argv[1], 0, strlen('/menu')) == '/menu') {
+    // if /menu is called from crontab check for holiday
+    if (array_key_exists(2, $argv) && $argv[2] === 'checkHoliday' && in_array($today, $holidays)) {
+        exit;
+    }
     array_push($updates, generateMessage(CHAT_ID, $argv[1], FROM_ID, FROM_FIRST_NAME, CHAT_TITLE));
   }
 } else {
